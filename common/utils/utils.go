@@ -6,9 +6,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"github.com/olekukonko/tablewriter"
-	"github.com/tidwall/gjson"
-	"github.com/wgpsec/ENScan/common/gologger"
 	"math"
 	"math/big"
 	"os"
@@ -16,6 +13,10 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/olekukonko/tablewriter"
+	"github.com/tidwall/gjson"
+	"github.com/wgpsec/ENScan/common/gologger"
 )
 
 // Md5 MD5加密
@@ -119,7 +120,14 @@ func ReadFileOutLine(filename string) []string {
 }
 
 func GetConfigPath() string { // 获得配置文件的绝对路径
-	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	homeDir, _ := os.UserHomeDir()
+	dir := filepath.Join(homeDir, ".config", "enscan")
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, 0755)
+		if err != nil {
+			gologger.Fatal().Msgf("创建配置目录失败: %v", err)
+		}
+	}
 	return dir
 }
 func DName(str string) (srt string) { // 获得文件名
